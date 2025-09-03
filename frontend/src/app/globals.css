@@ -37,9 +37,19 @@ h1, h2, h3, h4, h5 {
   line-height: 1.2;
 }
 
-.container {
+/* --- NOUVELLE STRUCTURE GLOBALE --- */
+
+.app-container {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  /* On ajoute un padding-top pour compenser la hauteur du header fixe */
+  padding-top: 70px; 
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
 }
 
 /* Sidebar Styles */
@@ -117,13 +127,11 @@ h1, h2, h3, h4, h5 {
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
-/* Main Content Styles */
+/* Le main-content est maintenant utilisé pour les pages publiques */
 .main-content {
   flex: 1;
-  margin-left: 280px;
-  padding: 0;
+  width: 100%;
 }
-
 section {
   padding: 80px 5%;
 }
@@ -737,4 +745,36 @@ footer {
 .timeline-date {
   font-size: 0.9rem;
   color: #777;
+}
+
+/* Styles pour la nouvelle mise en page avec Header */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+}
+
+/* On s'assure que le contenu principal prend toute la largeur maintenant */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* --- STRUCTURE SPÉCIFIQUE AU DASHBOARD --- */
+
+.dashboard-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f4f7f6; /* Un fond légèrement gris pour le contenu du dashboard */
 }

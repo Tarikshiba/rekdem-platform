@@ -1,9 +1,10 @@
-// Fichier: frontend/src/app/layout.tsx
+// frontend/src/app/layout.tsx
 
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
-import { AuthProvider } from "@/context/AuthContext"; // L'import pour le contexte
+import { AuthProvider } from "@/context/AuthContext";
+import { ChatProvider } from "@/context/ChatContext";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "REKDEM - Plateforme pour Transitaires en Afrique",
@@ -24,12 +25,16 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {/* On enveloppe toute l'application avec le AuthProvider */}
         <AuthProvider>
-          <div className="container">
-            <Sidebar />
-            {children}
-          </div>
+          <ChatProvider>
+            <div className="app-container">
+              <Header />
+              {/* Le main-layout et le main-content sont toujours utiles pour la structure globale */}
+              <div className="main-layout">
+                {children}
+              </div>
+            </div>
+          </ChatProvider>
         </AuthProvider>
       </body>
     </html>
