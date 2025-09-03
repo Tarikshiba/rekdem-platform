@@ -2,7 +2,8 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar"; // Vous avez raison de garder .tsx
+import Sidebar from "@/components/Sidebar";
+import { AuthProvider } from "@/context/AuthContext"; // L'import pour le contexte
 
 export const metadata: Metadata = {
   title: "REKDEM - Plateforme pour Transitaires en Afrique",
@@ -17,20 +18,19 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
-        {/*
-          CETTE LIGNE EST LA PIÈCE MANQUANTE.
-          Elle connecte votre projet à la bibliothèque d'icônes Font Awesome.
-        */}
         <link 
           rel="stylesheet" 
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
         />
       </head>
       <body>
-        <div className="container">
-          <Sidebar />
-          {children}
-        </div>
+        {/* On enveloppe toute l'application avec le AuthProvider */}
+        <AuthProvider>
+          <div className="container">
+            <Sidebar />
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
