@@ -3,7 +3,7 @@
 import { getTransitairePublicProfile } from '@/services/api';
 import Link from 'next/link';
 
-// Interfaces pour typer les données que nous allons recevoir
+// Interfaces pour les données (pas de changement ici)
 interface Depot {
   id: string;
   name: string;
@@ -25,105 +25,85 @@ interface TransitaireProfile {
   profile_picture_url: string | null;
   cover_picture_url: string | null;
   whatsapp_number: string | null;
-  facebook_url: string | null;
-  instagram_url: string | null;
-  youtube_url: string | null;
-  tiktok_url: string | null;
-  telegram_url: string | null;
+  // ... autres champs
   depots: Depot[];
   routes: Route[];
 }
 
-const TransitaireProfilePage = async ({ params }: { params: { id: string } }) => {
+// --- CORRECTION DU TYPAGE ICI ---
+// On définit proprement le type des props que la page reçoit
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+const TransitaireProfilePage = async ({ params }: PageProps) => {
   let transitaire: TransitaireProfile | null = null;
   let error = null;
 
   try {
     transitaire = await getTransitairePublicProfile(params.id);
   } catch (err) {
-    console.error(err);
     error = "Impossible de charger le profil de ce transitaire.";
   }
 
   if (error || !transitaire) {
     return (
-      <main className="main-content" style={{ padding: '2rem' }}>
+      <div className="main-content p-8 text-center">
         <h1>Profil non trouvé</h1>
-        <p>{error || "Le transitaire que vous cherchez n'existe pas."}</p>
-        <Link href="/transitaires">&larr; Retour à la liste</Link>
-      </main>
+        <p className="mb-4">{error || "Le transitaire que vous cherchez n'existe pas."}</p>
+        <Link href="/transitaires" className="btn btn-secondary">&larr; Retour à la liste</Link>
+      </div>
     );
   }
 
   return (
-    <main className="main-content" style={{ background: '#fff' }}>
-      <section style={{ 
-          background: 'linear-gradient(45deg, #FF8C00, #FF4B2B)', 
-          color: 'white', 
-          padding: '3rem 2rem', 
-          textAlign: 'center',
-          position: 'relative'
-      }}>
-        {transitaire.profile_picture_url && (
-          <img 
-            src={`http://localhost:3001/${transitaire.profile_picture_url.replace(/\\/g, '/')}`}
-            alt={`Profil de ${transitaire.company_name}`}
-            style={{
-              width: '120px',
-              height: '120px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: '4px solid white',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-              marginBottom: '1rem'
-            }}
-          />
-        )}
-        <h1 style={{ margin: 0, fontSize: '2.5rem' }}>{transitaire.company_name}</h1>
-        <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>{transitaire.city}, {transitaire.country}</p>
+    <div className="main-content">
+      <section className="profile-hero">
+        <img 
+          src={transitaire.profile_picture_url ? `http://localhost:3001/${transitaire.profile_picture_url.replace(/\\/g, '/')}` : 'https://via.placeholder.com/120'}
+          alt={`Profil de ${transitaire.company_name}`}
+          className="profile-avatar"
+        />
+        <h1>{transitaire.company_name}</h1>
+        <p>{transitaire.city}, {transitaire.country}</p>
       </section>
 
-      <div style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-        <Link href="/transitaires" style={{ marginBottom: '2rem', display: 'inline-block' }}>&larr; Retour à la liste</Link>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem' }}>
-          
-          <div>
-            {transitaire.profile_bio && (
-                <section>
-                    <h2>À propos de nous</h2>
-                    <p style={{ lineHeight: 1.6, color: '#333' }}>{transitaire.profile_bio}</p>
-                </section>
+      <div className="profile-container">
+        <main>
+          {transitaire.profile_bio && (
+              <section className="profile-section">
+                  <h2>À propos de nous</h2>
+                  <p className="text-gray-600">{transitaire.profile_bio}</p>
+              </section>
+          )}
+
+          <section className="profile-section">
+            <h2>Nos Dépôts</h2>
+            {transitaire.depots.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {transitaire.depots.map(depot => (
+                  <div key={depot.id} className="depot-card">
+                    <strong>{depot.name}</strong>
+                    <p>{depot.address}, {depot.country}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Ce transitaire n'a pas encore ajouté de dépôt.</p>
             )}
+          </section>
 
-            <hr style={{ margin: '2rem 0' }}/>
-            
-            <section>
-              <h2>Nos Dépôts</h2>
-              {transitaire.depots.length > 0 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
-                  {transitaire.depots.map(depot => (
-                    <div key={depot.id} style={{ border: '1px solid #ddd', padding: '1rem', borderRadius: '8px' }}>
-                      <strong>{depot.name}</strong>
-                      <p style={{ margin: '0.5rem 0 0', color: '#666' }}>{depot.address}, {depot.country}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>Ce transitaire n'a pas encore ajouté de dépôt.</p>
-              )}
-            </section>
-
-            <hr style={{ margin: '2rem 0' }}/>
-
-            <section>
-              <h2>Nos Routes et Tarifs</h2>
-              {transitaire.routes.length > 0 ? (
-                <table className="dashboard-table" style={{ width: '100%' }}>
+          <section className="profile-section">
+            <h2>Nos Routes et Tarifs</h2>
+            {transitaire.routes.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="dashboard-table w-full">
                   <thead>
                     <tr>
                       <th>Mode</th>
-                      <th>Prix par Kg</th>
+                      <th>Prix par Kg (FCFA)</th>
                       <th>Durée estimée</th>
                     </tr>
                   </thead>
@@ -131,30 +111,30 @@ const TransitaireProfilePage = async ({ params }: { params: { id: string } }) =>
                     {transitaire.routes.map(route => (
                       <tr key={route.id}>
                         <td>{route.mode}</td>
-                        <td>{route.price_per_kg.toFixed(2)} €</td>
+                        <td>{route.price_per_kg.toFixed(2)}</td>
                         <td>{route.estimated_duration_in_days} jours</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              ) : (
-                <p>Ce transitaire n'a pas encore ajouté de route.</p>
-              )}
-            </section>
-          </div>
+              </div>
+            ) : (
+              <p>Ce transitaire n'a pas encore ajouté de route.</p>
+            )}
+          </section>
+        </main>
 
-          <aside>
-            <div style={{ background: '#f9f9f9', padding: '1.5rem', borderRadius: '8px' }}>
-              <h3>Contact & Réseaux</h3>
-              {transitaire.whatsapp_number && (
-                <p><strong>WhatsApp:</strong> {transitaire.whatsapp_number}</p>
-              )}
-              {/* Les liens sociaux viendront ici */}
-            </div>
-          </aside>
-        </div>
+        <aside className="profile-sidebar">
+          <div className="card">
+            <h3>Contact & Réseaux</h3>
+            {transitaire.whatsapp_number && (
+              <p><strong>WhatsApp:</strong> {transitaire.whatsapp_number}</p>
+            )}
+            {/* Les liens sociaux viendront ici */}
+          </div>
+        </aside>
       </div>
-    </main>
+    </div>
   );
 };
 
