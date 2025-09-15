@@ -30,15 +30,8 @@ interface TransitaireProfile {
   routes: Route[];
 }
 
-// --- CORRECTION DU TYPAGE ICI ---
-// On définit proprement le type des props que la page reçoit
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-const TransitaireProfilePage = async ({ params }: PageProps) => {
+// On retire notre "interface PageProps" et on type directement les props de la fonction
+const TransitaireProfilePage = async ({ params }: { params: { id: string } }) => {
   let transitaire: TransitaireProfile | null = null;
   let error = null;
 
@@ -58,6 +51,7 @@ const TransitaireProfilePage = async ({ params }: PageProps) => {
     );
   }
 
+  // Le reste du code JSX ne change pas
   return (
     <div className="main-content">
       <section className="profile-hero">
