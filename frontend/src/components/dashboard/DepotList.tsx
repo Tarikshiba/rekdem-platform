@@ -1,3 +1,5 @@
+// frontend/src/components/dashboard/DepotList.tsx
+
 "use client";
 import { useState, useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
@@ -34,21 +36,21 @@ const DepotList: React.FC<DepotListProps> = ({ depots, loading, error, onActionC
     }
   };
 
-  if (loading) return <p>Chargement des dépôts...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (loading) return <p className="p-4 text-center">Chargement des dépôts...</p>;
+  if (error) return <p className="p-4 text-center text-error">{error}</p>;
 
   return (
-    <div className="dashboard-section">
-      <h3>Vos Dépôts</h3>
+    // The redundant dashboard-section div has been removed.
+    <>
       {depots.length === 0 ? (
-        <p>Vous n'avez pas encore de dépôt.</p>
+        <p className="p-4 text-center">Vous n'avez pas encore de dépôt.</p>
       ) : (
-        <div>
+        <div className="space-y-4"> {/* Helper class to space out cards */}
           {depots.map((depot) => (
             <div key={depot.id} className="card">
               <div className="card-content">
                 <strong>{depot.name}</strong> ({depot.country})
-                <p style={{ color: '#666', fontSize: '0.9rem' }}>{depot.address}</p>
+                <p className="text-sm text-gray-500 mt-1">{depot.address}</p>
               </div>
               <div className="card-actions">
                 <button onClick={() => setEditingDepot(depot)}>
@@ -72,7 +74,7 @@ const DepotList: React.FC<DepotListProps> = ({ depots, loading, error, onActionC
           onActionComplete();
         }}
       />
-    </div>
+    </>
   );
 };
 

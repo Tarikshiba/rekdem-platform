@@ -1,76 +1,55 @@
+// frontend/src/components/Sidebar.tsx
+
 "use client";
-import { useState, useContext } from 'react';
-import Modal from './common/Modal';
-import RegisterForm from './auth/RegisterForm';
-import LoginForm from './auth/LoginForm';
+import { useContext } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { AuthContext } from '../context/AuthContext';
+import { UserRole } from '@/types/enums'; // Chemin corrigé pour pointer vers le nouveau fichier
 
 const Sidebar = () => {
-  const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
-  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-
   const authContext = useContext(AuthContext);
+  const pathname = usePathname();
 
-  const handleLogout = () => {
-    if (authContext) {
-      authContext.logout();
-    }
+  if (!authContext?.user) {
+    return null;
   }
 
-  // Cette fonction sera passée au LoginForm
-  const handleLoginSuccess = () => {
-    setTimeout(() => {
-      setLoginModalOpen(false);
-    }, 2000); // Ferme le modal 2 secondes après le message de succès
-  };
+  const clientLinks = [
+    { href: '/dashboard', icon: 'fas fa-th-large', label: 'Tableau de bord' },
+    { href: '/dashboard/nouvelle-commande', icon: 'fas fa-plus-circle', label: 'Nouvelle Commande' },
+    { href: '/dashboard/messagerie', icon: 'fas fa-comments', label: 'Messagerie' },
+    { href: '/dashboard/profil', icon: 'fas fa-user', label: 'Mon Profil' },
+  ];
+
+  const transitaireLinks = [
+    { href: '/dashboard', icon: 'fas fa-th-large', label: 'Tableau de bord' },
+    { href: '/dashboard/depots', icon: 'fas fa-warehouse', label: 'Gérer mes Dépôts' },
+    { href: '/dashboard/routes', icon: 'fas fa-route', label: 'Gérer mes Routes' },
+    { href: '/dashboard/messagerie', icon: 'fas fa-comments', label: 'Messagerie' },
+    { href: '/dashboard/profil', icon: 'fas fa-user-tie', label: 'Mon Profil Pro' },
+  ];
+
+  const links = authContext.user.role === UserRole.TRANSITAIRE ? transitaireLinks : clientLinks;
 
   return (
-    <>
-      <aside className="sidebar">
-        <div className="logo">REKDEM</div>
-
-        {authContext && authContext.user ? (
-          <div className="auth-buttons">
-            <p style={{ color: 'white', textAlign: 'center', marginBottom: '1rem' }}>
-              Bienvenue, <br /> {authContext.user.email}
-            </p>
-            <button onClick={handleLogout} className="btn btn-outline">
-              Se déconnecter
-            </button>
-          </div>
-        ) : (
-          <div className="auth-buttons">
-            <button 
-              onClick={() => setLoginModalOpen(true)} 
-              className="btn btn-outline"
-            >
-              Se connecter
-            </button>
-            <button 
-              onClick={() => setRegisterModalOpen(true)} 
-              className="btn btn-filled"
-            >
-              S'inscrire
-            </button>
-          </div>
-        )}
-      </aside>
-
-      <Modal 
-        isOpen={isRegisterModalOpen} 
-        onClose={() => setRegisterModalOpen(false)}
-      >
-        <RegisterForm />
-      </Modal>
-
-      <Modal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setLoginModalOpen(false)}
-      >
-        {/* LA CORRECTION EST ICI : on passe la fonction en prop */}
-        <LoginForm onLoginSuccess={handleLoginSuccess} />
-      </Modal>
-    </>
+    <aside className="sidebar">
+      <nav>
+        <ul className="sidebar-menu">
+          {links.map((link) => (
+            <li key={link.href} className="sidebar-item">
+              <Link
+                href={link.href}
+                className={`sidebar-link ${pathname === link.href ? 'active' : ''}`}
+              >
+                <i className={link.icon}></i>
+                <span>{link.label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
   );
 };
 

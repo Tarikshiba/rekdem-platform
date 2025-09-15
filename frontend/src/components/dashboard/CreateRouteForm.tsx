@@ -1,3 +1,5 @@
+// frontend/src/components/dashboard/CreateRouteForm.tsx
+
 "use client";
 import { useState, useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
@@ -32,6 +34,11 @@ const CreateRouteForm: React.FC<CreateRouteFormProps> = ({ depots, onRouteCreate
       setError("Veuillez remplir tous les champs.");
       return;
     }
+    
+    if (originDepotId === destinationDepotId) {
+      setError("Le dépôt de départ et d'arrivée ne peuvent pas être identiques.");
+      return;
+    }
 
     try {
       await createRoute({
@@ -55,25 +62,26 @@ const CreateRouteForm: React.FC<CreateRouteFormProps> = ({ depots, onRouteCreate
   };
 
   return (
-    <div className="dashboard-section">
-      <h3>Ajouter une nouvelle route</h3>
+    <div className="mt-6">
+      <h4 className="mb-4">Ajouter une nouvelle route</h4>
       <form onSubmit={handleSubmit}>
         <div className="form-grid">
           <div className="form-group">
             <label className="form-label" htmlFor="origin-depot">Dépôt de départ</label>
             <select id="origin-depot" value={originDepotId} onChange={(e) => setOriginDepotId(e.target.value)} required className="form-select">
-              <option value="">Sélectionnez un dépôt</option>
+              <option value="" disabled>Sélectionnez un dépôt</option>
               {depots.map(depot => <option key={depot.id} value={depot.id}>{depot.name}</option>)}
             </select>
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="destination-depot">Dépôt d'arrivée</label>
             <select id="destination-depot" value={destinationDepotId} onChange={(e) => setDestinationDepotId(e.target.value)} required className="form-select">
-              <option value="">Sélectionnez un dépôt</option>
+              <option value="" disabled>Sélectionnez un dépôt</option>
               {depots.map(depot => <option key={depot.id} value={depot.id}>{depot.name}</option>)}
             </select>
           </div>
         </div>
+        
         <div className="form-group">
           <label className="form-label" htmlFor="mode">Mode de transport</label>
           <select id="mode" value={mode} onChange={(e) => setMode(e.target.value)} required className="form-select">
@@ -82,19 +90,21 @@ const CreateRouteForm: React.FC<CreateRouteFormProps> = ({ depots, onRouteCreate
               <option value="express">Express</option>
           </select>
         </div>
+
         <div className="form-grid">
           <div className="form-group">
-            <label className="form-label" htmlFor="price">Prix par kg (€)</label>
-            <input type="number" step="0.01" id="price" value={price} onChange={(e) => setPrice(e.target.value)} required className="form-input"/>
+            <label className="form-label" htmlFor="price">Prix par kg (FCFA)</label>
+            <input type="number" step="0.01" id="price" value={price} onChange={(e) => setPrice(e.target.value)} required className="form-input" placeholder="ex: 12.50"/>
           </div>
           <div className="form-group">
             <label className="form-label" htmlFor="duration">Durée estimée (jours)</label>
-            <input type="number" id="duration" value={duration} onChange={(e) => setDuration(e.target.value)} required className="form-input"/>
+            <input type="number" id="duration" value={duration} onChange={(e) => setDuration(e.target.value)} required className="form-input" placeholder="ex: 7"/>
           </div>
         </div>
 
-        {success && <p style={{ color: 'green', marginBottom: '1rem' }}>{success}</p>}
-        {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
+        {success && <p className="text-success mb-4">{success}</p>}
+        {error && <p className="text-error mb-4">{error}</p>}
+        
         <button type="submit" className="btn btn-primary">Créer la route</button>
       </form>
     </div>

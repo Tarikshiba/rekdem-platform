@@ -1,3 +1,5 @@
+// frontend/src/components/dashboard/CreateDepotForm.tsx
+
 "use client";
 import { useState, useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
@@ -34,33 +36,39 @@ const CreateDepotForm = ({ onDepotCreated }: { onDepotCreated: () => void }) => 
   };
 
   return (
-    <div className="dashboard-section">
-      <h3>Ajouter un nouveau dépôt</h3>
+    // The redundant dashboard-section div has been removed.
+    <div className="mt-6"> {/* Margin top to space it from the list */}
+      <h4 className="mb-4">Ajouter un nouveau dépôt</h4>
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="depot-name">Nom du dépôt (ex: Entrepôt Abidjan)</label>
-          <input
-            type="text"
-            id="depot-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="form-input"
-          />
+        <div className="form-grid">
+          <div className="form-group">
+            <label className="form-label" htmlFor="depot-name">Nom du dépôt</label>
+            <input
+              type="text"
+              id="depot-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="form-input"
+              placeholder="ex: Entrepôt Abidjan"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="depot-country">Pays</label>
+            <input
+              type="text"
+              id="depot-country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
+              className="form-input"
+              placeholder="ex: Côte d'Ivoire"
+            />
+          </div>
         </div>
+        
         <div className="form-group">
-          <label className="form-label" htmlFor="depot-country">Pays</label>
-          <input
-            type="text"
-            id="depot-country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            required
-            className="form-input"
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label" htmlFor="depot-address">Adresse</label>
+          <label className="form-label" htmlFor="depot-address">Adresse complète</label>
           <input
             type="text"
             id="depot-address"
@@ -71,8 +79,8 @@ const CreateDepotForm = ({ onDepotCreated }: { onDepotCreated: () => void }) => 
           />
         </div>
         
-        {success && <p style={{ color: 'green', marginBottom: '1rem' }}>{success}</p>}
-        {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
+        {success && <p className="text-success mb-4">{success}</p>}
+        {error && <p className="text-error mb-4">{error}</p>}
 
         <button type="submit" className="btn btn-primary">
           Créer le dépôt

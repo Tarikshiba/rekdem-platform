@@ -5,6 +5,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer"; // <-- Importer le Footer ici
 
 export const metadata: Metadata = {
   title: "REKDEM - Plateforme pour Transitaires en Afrique",
@@ -22,6 +23,9 @@ export default function RootLayout({
         <link 
           rel="stylesheet" 
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossOrigin="anonymous" 
+          referrerPolicy="no-referrer" 
         />
       </head>
       <body>
@@ -29,10 +33,10 @@ export default function RootLayout({
           <ChatProvider>
             <div className="app-container">
               <Header />
-              {/* Le main-layout et le main-content sont toujours utiles pour la structure globale */}
-              <div className="main-layout">
+              <main className="main-content">
                 {children}
-              </div>
+              </main>
+              <Footer /> {/* <-- Ajouter le Footer ici */}
             </div>
           </ChatProvider>
         </AuthProvider>

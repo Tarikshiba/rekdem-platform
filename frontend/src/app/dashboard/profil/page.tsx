@@ -4,7 +4,7 @@
 import { useState, useContext, useEffect, FormEvent } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { updateUserProfile, UpdateProfileData, uploadProfilePicture } from '@/services/api';
-import Link from 'next/link';
+import { UserRole } from '@/types/enums';
 
 const ProfilePage = () => {
   const authContext = useContext(AuthContext);
@@ -49,27 +49,6 @@ const ProfilePage = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!user || !token) {
-      setError("Vous n'êtes pas authentifié.");
-      return;
-    }
-    setError(null);
-    setSuccess(null);
-    
-    try {
-      const updatedUser = await updateUserProfile(user.id, formData, token);
-      if(setUser) {
-          setUser(updatedUser);
-      }
-      setSuccess("Profil mis à jour avec succès !");
-    } catch (err) {
-      setError("Erreur lors de la mise à jour du profil.");
-      console.error(err);
-    }
-  };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -79,122 +58,146 @@ const ProfilePage = () => {
 
   const handlePictureSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!profilePictureFile || !user || !token) {
-      setError("Veuillez sélectionner un fichier.");
-      return;
-    }
+    if (!profilePictureFile || !user || !token) return setError("Veuillez sélectionner un fichier.");
+    
     setError(null);
     setSuccess(null);
-
     try {
       const updatedUser = await uploadProfilePicture(profilePictureFile, token);
-      if (setUser) {
-        setUser(updatedUser);
-      }
+      if (setUser) setUser(updatedUser);
       setSuccess("Photo de profil mise à jour !");
       setProfilePictureFile(null);
     } catch (err) {
       setError("Erreur lors de l'envoi de l'image.");
-      console.error(err);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!user || !token) return setError("Vous n'êtes pas authentifié.");
+
+    setError(null);
+    setSuccess(null);
+    try {
+      const updatedUser = await updateUserProfile(user.id, formData, token);
+      if(setUser) setUser(updatedUser);
+      setSuccess("Profil mis à jour avec succès !");
+    } catch (err) {
+      setError("Erreur lors de la mise à jour du profil.");
     }
   };
 
   if (!user) {
-    return <p>Chargement...</p>;
+    return <p className="p-4 text-center">Chargement du profil...</p>;
   }
+  
+  const isTransitaire = user.role === UserRole.TRANSITAIRE;
 
   return (
-    <main className="main-content" style={{ padding: '2rem' }}>
-      <Link href="/dashboard">&larr; Retour au tableau de bord</Link>
-      <h1>Modifier mon Profil</h1>
+    <>
+      <h1>Mon Profil {isTransitaire ? "Professionnel" : ""}</h1>
 
-      <section style={{ marginTop: '2rem', background: '#f9f9f9', padding: '1.5rem', borderRadius: '8px' }}>
+      <div className="dashboard-section">
         <h3>Photo de profil</h3>
-        {user.profile_picture_url && (
+        <div className="flex items-center gap-6 mt-4">
           <img 
-            src={`http://localhost:3001/${user.profile_picture_url.replace(/\\/g, '/')}`}
-            alt="Photo de profil actuelle"
-            style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }}
+            src={user.profile_picture_url ? `http://localhost:3001/${user.profile_picture_url}` : 'https://via.placeholder.com/100'}
+            alt="Photo de profil"
+            className="w-24 h-24 rounded-full object-cover"
           />
-        )}
-        <form onSubmit={handlePictureSubmit}>
-            <label htmlFor="profile-picture-upload">
-                Choisir une nouvelle photo :
-            </label>
+          <form onSubmit={handlePictureSubmit} className="flex items-center gap-4">
             <input 
                 type="file" 
                 id="profile-picture-upload"
                 accept="image/*" 
-                onChange={handleFileChange} 
-                style={{ marginLeft: '10px' }}
+                onChange={handleFileChange}
+                className="form-input"
+                aria-label="Choisir une nouvelle photo de profil"
             />
-          <button type="submit" disabled={!profilePictureFile} className="btn btn-secondary" style={{ marginLeft: '1rem' }}>
-            Mettre à jour la photo
-          </button>
-        </form>
-      </section>
+            <button type="submit" disabled={!profilePictureFile} className="btn btn-secondary">
+              Mettre à jour
+            </button>
+          </form>
+        </div>
+      </div>
 
-      <hr style={{ margin: '2rem 0' }}/>
+      <form onSubmit={handleSubmit}>
+        <div className="dashboard-section">
+          <h3>Informations {isTransitaire ? "de l'entreprise" : "personnelles"}</h3>
+          
+          {isTransitaire && (
+            <div className="form-group mt-4">
+              <label htmlFor="company_name" className="form-label">Nom de l'entreprise</label>
+              <input type="text" name="company_name" id="company_name" value={formData.company_name} onChange={handleChange} className="form-input"/>
+            </div>
+          )}
+          
+          <div className="form-group mt-4">
+            <label htmlFor="profile_bio" className="form-label">Description / Bio</label>
+            <textarea name="profile_bio" id="profile_bio" value={formData.profile_bio} onChange={handleChange} className="form-textarea" rows={4}/>
+          </div>
+        </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="dashboard-section">
+            <h3>Informations de contact</h3>
+            <div className="form-grid mt-4">
+                <div className="form-group">
+                    <label htmlFor="phone" className="form-label">Téléphone</label>
+                    <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="form-input"/>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="whatsapp_number" className="form-label">Numéro WhatsApp</label>
+                    <input type="tel" name="whatsapp_number" id="whatsapp_number" value={formData.whatsapp_number} onChange={handleChange} className="form-input"/>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="country" className="form-label">Pays</label>
+                    <input type="text" name="country" id="country" value={formData.country} onChange={handleChange} className="form-input"/>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="city" className="form-label">Ville</label>
+                    <input type="text" name="city" id="city" value={formData.city} onChange={handleChange} className="form-input"/>
+                </div>
+            </div>
+        </div>
+
+        {isTransitaire && (
+          <div className="dashboard-section">
+            <h3>Réseaux Sociaux</h3>
+            <div className="form-grid mt-4">
+              <div className="form-group">
+                <label htmlFor="facebook_url" className="form-label">URL Facebook</label>
+                <input type="url" name="facebook_url" id="facebook_url" value={formData.facebook_url} onChange={handleChange} className="form-input" placeholder="https://..."/>
+              </div>
+              <div className="form-group">
+                <label htmlFor="instagram_url" className="form-label">URL Instagram</label>
+                <input type="url" name="instagram_url" id="instagram_url" value={formData.instagram_url} onChange={handleChange} className="form-input" placeholder="https://..."/>
+              </div>
+              <div className="form-group">
+                <label htmlFor="youtube_url" className="form-label">URL Youtube</label>
+                <input type="url" name="youtube_url" id="youtube_url" value={formData.youtube_url} onChange={handleChange} className="form-input" placeholder="https://..."/>
+              </div>
+              <div className="form-group">
+                <label htmlFor="tiktok_url" className="form-label">URL TikTok</label>
+                <input type="url" name="tiktok_url" id="tiktok_url" value={formData.tiktok_url} onChange={handleChange} className="form-input" placeholder="https://..."/>
+              </div>
+              <div className="form-group full-width">
+                <label htmlFor="telegram_url" className="form-label">URL Telegram</label>
+                <input type="url" name="telegram_url" id="telegram_url" value={formData.telegram_url} onChange={handleChange} className="form-input" placeholder="https://..."/>
+              </div>
+            </div>
+          </div>
+        )}
         
-        <div>
-          <label htmlFor="company_name">Nom de l'entreprise</label>
-          <input type="text" name="company_name" id="company_name" value={formData.company_name} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
+        <div className="mt-6">
+            {success && <p className="text-success mb-4">{success}</p>}
+            {error && <p className="text-error mb-4">{error}</p>}
+            
+            <button type="submit" className="btn btn-primary">
+                Enregistrer les modifications
+            </button>
         </div>
-        <div>
-          <label htmlFor="profile_bio">Description / Bio</label>
-          <textarea name="profile_bio" id="profile_bio" value={formData.profile_bio} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px', minHeight: '100px' }}/>
-        </div>
-
-        <h3>Informations de contact</h3>
-        <div>
-          <label htmlFor="phone">Téléphone</label>
-          <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-         <div>
-          <label htmlFor="whatsapp_number">Numéro WhatsApp</label>
-          <input type="tel" name="whatsapp_number" id="whatsapp_number" value={formData.whatsapp_number} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-        <div>
-          <label htmlFor="country">Pays</label>
-          <input type="text" name="country" id="country" value={formData.country} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-        <div>
-          <label htmlFor="city">Ville</label>
-          <input type="text" name="city" id="city" value={formData.city} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-
-        <h3>Réseaux Sociaux</h3>
-        <div>
-          <label htmlFor="facebook_url">URL Facebook</label>
-          <input type="url" name="facebook_url" id="facebook_url" value={formData.facebook_url} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-         <div>
-          <label htmlFor="instagram_url">URL Instagram</label>
-          <input type="url" name="instagram_url" id="instagram_url" value={formData.instagram_url} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-         <div>
-          <label htmlFor="youtube_url">URL Youtube</label>
-          <input type="url" name="youtube_url" id="youtube_url" value={formData.youtube_url} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-         <div>
-          <label htmlFor="tiktok_url">URL TikTok</label>
-          <input type="url" name="tiktok_url" id="tiktok_url" value={formData.tiktok_url} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-         <div>
-          <label htmlFor="telegram_url">URL Telegram</label>
-          <input type="url" name="telegram_url" id="telegram_url" value={formData.telegram_url} onChange={handleChange} style={{ width: '100%', padding: '8px', marginTop: '4px' }}/>
-        </div>
-
-        {success && <p style={{ color: 'green' }}>{success}</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        
-        <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', alignSelf: 'flex-start' }}>
-          Enregistrer les modifications
-        </button>
       </form>
-    </main>
+    </>
   );
 };
 

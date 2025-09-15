@@ -218,3 +218,31 @@ export const uploadProfilePicture = async (file: File, token: string) => {
   });
   return response.data;
 };
+
+// --- MESSAGERIE ---
+export const getConversations = async (token: string) => {
+  const response = await apiClient.get('/conversation', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getConversationById = async (conversationId: string, token: string) => {
+    const response = await apiClient.get(`/conversation/${conversationId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+}
+
+// --- PAIEMENT ---
+interface PaymentInitiationData {
+  planName: string;
+  amount: number;
+}
+
+export const initiatePaymentSession = async (paymentData: PaymentInitiationData, token: string) => {
+  const response = await apiClient.post('/payment/initiate', paymentData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data; // Devrait contenir { paymentUrl: '...' }
+};

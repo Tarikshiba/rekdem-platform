@@ -1,21 +1,21 @@
+// frontend/src/components/dashboard/RouteList.tsx
+
 "use client";
 import { useState, useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 import { deleteRoute } from '@/services/api';
 import UpdateRouteModal from './UpdateRouteModal';
 
-// Interfaces pour les données que le composant utilise
 interface Depot {
   id: string;
   name: string;
 }
-// INTERFACE CORRIGÉE
 interface Route {
   id: string;
   originDepot: Depot;
   destinationDepot: Depot;
   mode: string;
-  price_per_kg: number; // C'était price_per_kg_in_cents
+  price_per_kg: number;
   estimated_duration_in_days: number;
 }
 interface RouteListProps {
@@ -44,34 +44,33 @@ const RouteList: React.FC<RouteListProps> = ({ routes, depots, loading, error, o
     }
   };
 
-  if (loading) return <p>Chargement des routes...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (loading) return <p className="p-4 text-center">Chargement des routes...</p>;
+  if (error) return <p className="p-4 text-center text-error">{error}</p>;
 
   return (
-    <div style={{ marginTop: '2rem' }}>
-      {/* <h3>Vos Routes</h3> */} {/* Titre déjà présent sur la page principale */}
+    <>
       {routes.length === 0 ? (
-        <p>Vous n'avez pas encore de route.</p>
+        <p className="p-4 text-center">Vous n'avez pas encore de route.</p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <div className="space-y-4"> {/* Helper class pour espacer les cartes */}
           {routes.map((route) => (
-            <li key={route.id} style={{ border: '1px solid #ddd', padding: '1rem', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <strong>{route.originDepot.name} → {route.destinationDepot.name}</strong>
-                  <div>Mode: {route.mode}</div>
-                  {/* LIGNE CORRIGÉE */}
-                  <div>Prix: {route.price_per_kg.toFixed(2)}€ / kg</div>
-                  <div>Durée: {route.estimated_duration_in_days} jours</div>
+            <div key={route.id} className="card">
+              <div className="card-content">
+                <div className="flex justify-between items-center mb-2">
+                  <strong className="text-lg">{route.originDepot.name} → {route.destinationDepot.name}</strong>
+                  <span className="font-bold text-primary-600">{route.price_per_kg.toFixed(2)}FCFA / kg</span>
                 </div>
-                <div>
-                  <button onClick={() => setEditingRoute(route)} style={{ marginRight: '10px' }}>Modifier</button>
-                  <button onClick={() => handleDelete(route.id)} style={{ color: 'red' }}>Supprimer</button>
+                <div className="text-sm text-gray-500">
+                  <span>Mode: {route.mode}</span> | <span>Durée: {route.estimated_duration_in_days} jours</span>
                 </div>
               </div>
-            </li>
+              <div className="card-actions">
+                <button onClick={() => setEditingRoute(route)}>Modifier</button>
+                <button onClick={() => handleDelete(route.id)} className="delete-btn">Supprimer</button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
       
       <UpdateRouteModal 
@@ -84,7 +83,7 @@ const RouteList: React.FC<RouteListProps> = ({ routes, depots, loading, error, o
           onActionComplete();
         }}
       />
-    </div>
+    </>
   );
 };
 
