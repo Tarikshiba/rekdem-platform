@@ -1,9 +1,9 @@
 // frontend/src/services/api.ts
-
 import axios from 'axios';
 
+// On dit à Axios d'utiliser l'URL de production si elle existe, sinon celle en local
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   headers: {
     'Content-Type': 'application/json',
   },
