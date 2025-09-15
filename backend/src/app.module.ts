@@ -20,16 +20,17 @@ import { PaymentModule } from './payment/payment.module';
     ConfigModule.forRoot({
       isGlobal: true, 
     }),
+    // --- NOUVELLE CONFIGURATION POUR LA PRODUCTION ---
     TypeOrmModule.forRoot({
       type: 'postgres',
-      // On ajoute '!' pour dire à TypeScript : "cette variable existera, fais-moi confiance"
-      host: process.env.DB_HOST!,
-      port: parseInt(process.env.DB_PORT!, 10),
-      username: process.env.DB_USERNAME!,
-      password: process.env.DB_PASSWORD!,
-      database: process.env.DB_DATABASE!,
+      // Utilise l'URL de connexion fournie par Neon (ou une autre BDD de prod)
+      url: process.env.DATABASE_URL, 
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: true, // Attention: à mettre à `false` une fois le schéma stable en production
+      // Options requises pour que TypeORM se connecte à Neon via SSL
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),
     UserModule,
     AuthModule,

@@ -2,21 +2,24 @@
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { join } from 'path'; // On importe la fonction 'join'
-import { NestExpressApplication } from '@nestjs/platform-express'; // On importe le type pour Express
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  // On spécifie que notre app utilise Express
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Active CORS pour que votre frontend puisse communiquer avec le backend
   app.enableCors();
 
-  // --- NOUVELLE LIGNE ---
-  // On dit à notre app de servir les fichiers statiques qui se trouvent dans le dossier 'uploads'
+  // On conserve votre configuration pour servir les images uploadées
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/', // On ajoute un préfixe pour que l'URL soit propre
+    prefix: '/uploads/',
   });
 
-  await app.listen(process.env.PORT ?? 3001);
+  // Render (ou un autre service de déploiement) fournira un port via cette variable d'environnement.
+  // Si elle n'existe pas (en local), on utilise le port 3001 par défaut.
+  const port = process.env.PORT || 3001;
+  
+  await app.listen(port);
 }
 bootstrap();
